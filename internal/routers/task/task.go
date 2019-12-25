@@ -1,18 +1,19 @@
 package task
 
 import (
+	"github.com/infamt/gocron/internal/routers/user"
 	"strconv"
 	"strings"
 
 	"github.com/ouqiang/goutil"
 
 	"github.com/go-macaron/binding"
+	"github.com/infamt/gocron/internal/models"
+	"github.com/infamt/gocron/internal/modules/logger"
+	"github.com/infamt/gocron/internal/modules/utils"
+	"github.com/infamt/gocron/internal/routers/base"
+	"github.com/infamt/gocron/internal/service"
 	"github.com/jakecoffman/cron"
-	"github.com/ouqiang/gocron/internal/models"
-	"github.com/ouqiang/gocron/internal/modules/logger"
-	"github.com/ouqiang/gocron/internal/modules/utils"
-	"github.com/ouqiang/gocron/internal/routers/base"
-	"github.com/ouqiang/gocron/internal/service"
 	"gopkg.in/macaron.v1"
 )
 
@@ -90,7 +91,11 @@ func Detail(ctx *macaron.Context) string {
 func Store(ctx *macaron.Context, form TaskForm) string {
 	json := utils.JsonResponse{}
 	taskModel := models.Task{}
-	var id = form.Id
+	var (
+		id         = form.Id
+		actionType = "修改"
+		taskHost   = ""
+	)
 	nameExists, err := taskModel.NameExist(form.Name, form.Id)
 	if err != nil {
 		return json.CommonFailure(utils.FailureContent, err)
@@ -173,6 +178,7 @@ func Store(ctx *macaron.Context, form TaskForm) string {
 		// 任务添加后开始调度执行
 		taskModel.Status = models.Running
 		id, err = taskModel.Create()
+		actionType = "添加"
 	} else {
 		_, err = taskModel.UpdateBean(id)
 	}
@@ -198,6 +204,13 @@ func Store(ctx *macaron.Context, form TaskForm) string {
 		addTaskToTimer(id)
 	}
 
+	// 记录行为日志
+	userModel := new(models.User)
+	userModel.Find(user.Uid(ctx))
+	username := userModel.Name
+	remoteAddr := ctx.RemoteAddr()
+	service.CreateActionLog(taskModel, username, remoteAddr, actionType, taskHost)
+
 	return json.Success("保存成功", nil)
 }
 
@@ -206,6 +219,16 @@ func Remove(ctx *macaron.Context) string {
 	id := ctx.ParamsInt(":id")
 	json := utils.JsonResponse{}
 	taskModel := new(models.Task)
+
+	// 记录行为日志
+	taskDetail, _ := taskModel.Detail(id)
+	userModel := new(models.User)
+	userModel.Find(user.Uid(ctx))
+	username := userModel.Name
+	remoteAddr := ctx.RemoteAddr()
+	actionType := "删除"
+	service.CreateActionLog(taskDetail, username, remoteAddr, actionType, "")
+
 	_, err := taskModel.Delete(id)
 	if err != nil {
 		return json.CommonFailure(utils.FailureContent, err)
@@ -221,11 +244,33 @@ func Remove(ctx *macaron.Context) string {
 
 // 激活任务
 func Enable(ctx *macaron.Context) string {
+	// 记录行为日志
+	id := ctx.ParamsInt(":id")
+	taskModel := new(models.Task)
+	taskDetail, _ := taskModel.Detail(id)
+	userModel := new(models.User)
+	userModel.Find(user.Uid(ctx))
+	username := userModel.Name
+	remoteAddr := ctx.RemoteAddr()
+	actionType := "激活"
+	service.CreateActionLog(taskDetail, username, remoteAddr, actionType, "")
+
 	return changeStatus(ctx, models.Enabled)
 }
 
 // 暂停任务
 func Disable(ctx *macaron.Context) string {
+	// 记录行为日志
+	id := ctx.ParamsInt(":id")
+	taskModel := new(models.Task)
+	taskDetail, _ := taskModel.Detail(id)
+	userModel := new(models.User)
+	userModel.Find(user.Uid(ctx))
+	username := userModel.Name
+	remoteAddr := ctx.RemoteAddr()
+	actionType := "禁用"
+	service.CreateActionLog(taskDetail, username, remoteAddr, actionType, "")
+
 	return changeStatus(ctx, models.Disabled)
 }
 
@@ -241,6 +286,15 @@ func Run(ctx *macaron.Context) string {
 
 	task.Spec = "手动运行"
 	service.ServiceTask.Run(task)
+
+	// 记录行为日志
+	taskDetail, _ := taskModel.Detail(id)
+	userModel := new(models.User)
+	userModel.Find(user.Uid(ctx))
+	username := userModel.Name
+	remoteAddr := ctx.RemoteAddr()
+	actionType := "执行"
+	service.CreateActionLog(taskDetail, username, remoteAddr, actionType, "")
 
 	return json.Success("任务已开始运行, 请到任务日志中查看结果", nil)
 }

@@ -10,10 +10,10 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/go-xorm/core"
 	"github.com/go-xorm/xorm"
+	"github.com/infamt/gocron/internal/modules/app"
+	"github.com/infamt/gocron/internal/modules/logger"
+	"github.com/infamt/gocron/internal/modules/setting"
 	_ "github.com/lib/pq"
-	"github.com/ouqiang/gocron/internal/modules/app"
-	"github.com/ouqiang/gocron/internal/modules/logger"
-	"github.com/ouqiang/gocron/internal/modules/setting"
 )
 
 type Status int8

@@ -1,4 +1,4 @@
-package loginlog
+package manage
 
 import (
 	"github.com/infamt/gocron/internal/models"
@@ -9,14 +9,14 @@ import (
 )
 
 func Index(ctx *macaron.Context) string {
-	loginLogModel := new(models.LoginLog)
+	actionLogModel := new(models.ActionLog)
 	params := models.CommonMap{}
 	base.ParsePageAndPageSize(ctx, params)
-	total, err := loginLogModel.Total()
+	total, err := actionLogModel.Total()
 	if err != nil {
 		logger.Error(err)
 	}
-	loginLogs, err := loginLogModel.List(params)
+	actionLogs, err := actionLogModel.List(params)
 	if err != nil {
 		logger.Error(err)
 	}
@@ -25,6 +25,6 @@ func Index(ctx *macaron.Context) string {
 
 	return jsonResp.Success(utils.SuccessContent, map[string]interface{}{
 		"total": total,
-		"data":  loginLogs,
+		"data":  actionLogs,
 	})
 }

@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/go-xorm/xorm"
-	"github.com/ouqiang/gocron/internal/modules/logger"
+	"github.com/infamt/gocron/internal/modules/logger"
 )
 
 type Migration struct{}
@@ -16,7 +16,7 @@ func (migration *Migration) Install(dbName string) error {
 	setting := new(Setting)
 	task := new(Task)
 	tables := []interface{}{
-		&User{}, task, &TaskLog{}, &Host{}, setting, &LoginLog{}, &TaskHost{},
+		&User{}, task, &TaskLog{}, &Host{}, setting, &LoginLog{}, &TaskHost{}, &ActionLog{},
 	}
 	for _, table := range tables {
 		exist, err := Db.IsTableExist(table)

@@ -22,6 +22,8 @@ import NotificationWebhook from '../pages/system/notification/webhook'
 
 import Install from '../pages/install/index'
 import LoginLog from '../pages/system/loginLog'
+import ActionLog from '../pages/system/action'
+
 
 Vue.use(Router)
 
@@ -151,6 +153,11 @@ const router = new Router({
       path: '/system/login-log',
       name: 'login-log',
       component: LoginLog
+    },
+    {
+      path: '/system/action-log',
+      name: 'login-log',
+      component: ActionLog
     }
   ]
 })

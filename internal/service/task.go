@@ -10,14 +10,14 @@ import (
 
 	"github.com/ouqiang/goutil"
 
+	"github.com/infamt/gocron/internal/models"
+	"github.com/infamt/gocron/internal/modules/app"
+	"github.com/infamt/gocron/internal/modules/httpclient"
+	"github.com/infamt/gocron/internal/modules/logger"
+	"github.com/infamt/gocron/internal/modules/notify"
+	rpcClient "github.com/infamt/gocron/internal/modules/rpc/client"
+	pb "github.com/infamt/gocron/internal/modules/rpc/proto"
 	"github.com/jakecoffman/cron"
-	"github.com/ouqiang/gocron/internal/models"
-	"github.com/ouqiang/gocron/internal/modules/app"
-	"github.com/ouqiang/gocron/internal/modules/httpclient"
-	"github.com/ouqiang/gocron/internal/modules/logger"
-	"github.com/ouqiang/gocron/internal/modules/notify"
-	rpcClient "github.com/ouqiang/gocron/internal/modules/rpc/client"
-	pb "github.com/ouqiang/gocron/internal/modules/rpc/proto"
 )
 
 var (
@@ -493,4 +493,22 @@ func execJob(handler Handler, taskModel models.Task, taskUniqueId int64) TaskRes
 	}
 
 	return TaskResult{Result: output, Err: err, RetryTimes: taskModel.RetryTimes}
+}
+
+// 创建行为日志
+func CreateActionLog(taskModel models.Task, username string, remoteAddr string, actionType string, taskHost string) (int, error) {
+	actionLogModel := new(models.ActionLog)
+	actionLogModel.Username = username
+	actionLogModel.Ip = remoteAddr
+	actionLogModel.TaskId = taskModel.Id
+	actionLogModel.TaskName = taskModel.Name
+	actionLogModel.ActionType = actionType
+	actionLogModel.Action = taskModel.Command
+	actionLogModel.TaskHost = taskHost
+	insertId, err := actionLogModel.Create()
+	if err != nil {
+		logger.Error("记录行为日志失败", err)
+	}
+
+	return insertId, err
 }

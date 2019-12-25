@@ -10,12 +10,12 @@ import (
 
 	macaron "gopkg.in/macaron.v1"
 
-	"github.com/ouqiang/gocron/internal/models"
-	"github.com/ouqiang/gocron/internal/modules/app"
-	"github.com/ouqiang/gocron/internal/modules/logger"
-	"github.com/ouqiang/gocron/internal/modules/setting"
-	"github.com/ouqiang/gocron/internal/routers"
-	"github.com/ouqiang/gocron/internal/service"
+	"github.com/infamt/gocron/internal/models"
+	"github.com/infamt/gocron/internal/modules/app"
+	"github.com/infamt/gocron/internal/modules/logger"
+	"github.com/infamt/gocron/internal/modules/setting"
+	"github.com/infamt/gocron/internal/routers"
+	"github.com/infamt/gocron/internal/service"
 	"github.com/ouqiang/goutil"
 	"github.com/urfave/cli"
 )

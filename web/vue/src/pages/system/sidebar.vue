@@ -9,6 +9,7 @@
       router>
       <el-menu-item index="/system">通知配置</el-menu-item>
       <el-menu-item index="/system/login-log">登录日志</el-menu-item>
+      <el-menu-item index="/system/action-log">行为日志</el-menu-item>
     </el-menu>
   </el-aside>
 </template>
